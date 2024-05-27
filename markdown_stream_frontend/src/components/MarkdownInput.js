@@ -1,37 +1,43 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-const MarkdownInput = () => {
-  const [markdownText, setMarkdownText] = useState('');
-  const router = useRouter();
+const MarkdownInput = ({ onSubmit }) => {
+  const [input, setInput] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const response = await fetch(process.env.NEXT_PUBLIC_MARKDOWN_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ markdownText }),
-    });
-    if (response.ok) {
-      router.push('/stream');
-    } else {
-      console.error('Failed to send markdown text');
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ markdownText: input }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit markdown text');
+      }
+
+      onSubmit(input);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-lg mx-auto p-4 bg-gray-800 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="flex flex-col justify-center items-center w-full max-w-lg mx-auto pb-4">
       <textarea
-        value={markdownText}
-        onChange={(e) => setMarkdownText(e.target.value)}
+        className="w-full h-40 p-2 border border-gray-300 rounded-md text-black"
         placeholder="Enter your markdown text here..."
-        className="w-full h-40 p-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
       />
-      <button type="submit" className="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
+      <button
+        type="submit"
+        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md"
+      >
         Submit
       </button>
     </form>
@@ -39,4 +45,3 @@ const MarkdownInput = () => {
 };
 
 export default MarkdownInput;
- 

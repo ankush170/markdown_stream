@@ -1,59 +1,64 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useRouter } from 'next/navigation';
 
-const MarkdownStream = () => {
+const MarkdownStream = ({ markdown }) => {
   const [content, setContent] = useState('');
   const [linkData, setLinkData] = useState(null);
-  const router = useRouter();
 
   useEffect(() => {
-    const eventSource = new EventSource(process.env.NEXT_PUBLIC_STREAM_API);
-
-    eventSource.onmessage = (event) => {
-      const data = event.data;
-      if (data.includes('—||Sources||—')) {
-        const parts = content.split('—||Sources||—');
-        setContent(parts[0]);
-        const linkInfo = parts[1].match(/\[.*?\]\((.*?)\)\{page:(\d+), highlight: (.*?)\}/);
-        if (linkInfo) {
-          const url = linkInfo[1];
-          const page = linkInfo[2];
-          const highlight = linkInfo[3];
-          setLinkData({ url, page, highlight });
-        }
-        eventSource.close();
+    let currentIndex = 0;
+    const lines = markdown.split('\n');
+    const interval = setInterval(() => {
+      if (currentIndex < lines.length) {
+        setContent((prevContent) => prevContent + lines[currentIndex] + '\n');
+        currentIndex++;
       } else {
-        setContent((prev) => prev + data);
+        const linkIndex = lines.findIndex(line => line.includes('—||Sources||—'));
+        if (linkIndex !== -1 && linkIndex + 1 < lines.length) {
+          const link = lines[linkIndex + 1];  
+          const urlMatch = link.match(/\[(.*?)\]\((.*?)\)\{page:(\d+),\s*highlight:\s*(.*?)\}/);
+          if (urlMatch) {
+            const url = urlMatch[2];
+            const page = urlMatch[3];
+            const highlight = urlMatch[4];
+            setLinkData({ url, page, highlight });
+          }
+        }
+        clearInterval(interval);
       }
-    };
+    }, 100);
 
     return () => {
-      eventSource.close();
+      clearInterval(interval);
     };
-  }, [router]);
+  }, [markdown]);
 
-  const handleClick = () => {
+  const handleLinkClick = (e) => {
+    e.preventDefault();
     if (linkData) {
       const { url, page, highlight } = linkData;
-      router.push(`${url}?page=${page}&highlight=${encodeURIComponent(highlight)}`);
+      const fullUrl = `/highlight?url=${encodeURIComponent(url)}&page=${page}&highlight=${encodeURIComponent(highlight)}`;
+      if (typeof window !== 'undefined') {
+        window.open(fullUrl, '_blank');
+      }
     }
   };
 
   return (
-    <div className="p-4">
-      <div className="max-w-2xl mx-auto bg-gray-800 p-6 rounded-lg shadow-md">
-        <ReactMarkdown className="prose prose-invert">{content}</ReactMarkdown>
+    <div className='flex flex-col justify-center items-center'>
+      <div className="max-w-2xl bg-gray-800 p-6 rounded-lg shadow-md">
+        <ReactMarkdown>{content}</ReactMarkdown>
         {linkData && (
           <div className="mt-4">
-            <button
-              className="text-blue-500 underline"
-              onClick={handleClick}
+            <a
+              href="#"
+              onClick={handleLinkClick}
+              className="text-blue-500 hover:underline cursor-pointer"
             >
-              Open Document
-            </button>
+              {linkData.url}
+            </a>
           </div>
         )}
       </div>

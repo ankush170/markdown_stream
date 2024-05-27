@@ -1,9 +1,11 @@
 import express from 'express';
-import fetch from 'node-fetch';
+import cors from 'cors';
 
 const router = express.Router();
 
 let storedMarkdownText = '';
+
+router.use(cors())
 
 router.post('/', (req, res) => {
   const { markdownText } = req.body;
@@ -15,7 +17,7 @@ router.post('/', (req, res) => {
   }
 });
 
-router.get('/stream', async (req, res) => {
+router.get('/stream', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
