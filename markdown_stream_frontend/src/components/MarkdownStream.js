@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-const MarkdownStream = ({ markdown }) => {
+const MarkdownStream = ({ markdown, resetTrigger }) => {
   const [content, setContent] = useState('');
   const [linkData, setLinkData] = useState(null);
 
   useEffect(() => {
+    setContent('');
+    
     let currentIndex = 0;
     const lines = markdown.split('\n');
     const interval = setInterval(() => {
@@ -33,7 +35,7 @@ const MarkdownStream = ({ markdown }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [markdown]);
+  }, [markdown, resetTrigger]);
 
   const handleLinkClick = (e) => {
     e.preventDefault();
