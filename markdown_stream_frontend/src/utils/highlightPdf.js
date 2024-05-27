@@ -5,7 +5,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export async function highlightTextInPDF(url, pageNumber, highlightText) {
   try {
-    const proxyUrl = `http://localhost:8000/proxy?url=${encodeURIComponent(url)}`;
+    const proxyUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/proxy?url=${encodeURIComponent(url)}`;
     console.log(`Fetching from proxy URL: ${proxyUrl}`);
 
     const loadingTask = pdfjsLib.getDocument(proxyUrl);

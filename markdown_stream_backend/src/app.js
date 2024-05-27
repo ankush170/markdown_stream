@@ -28,7 +28,7 @@ app.get("/proxy", async (req, res) => {
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     res.set("Content-Type", response.headers.get("Content-Type"));
-    res.set("Access-Control-Allow-Origin", "*"); // Allow all origins or specify your frontend origin
+    res.set("Access-Control-Allow-Origin", "*");
     res.send(buffer);
   } catch (error) {
     console.error(error);
