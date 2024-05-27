@@ -38,7 +38,7 @@ const MarkdownStream = ({ markdown, resetTrigger }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [markdown, resetTrigger]);
+  }, [markdown]);
 
   const handleLinkClick = (e) => {
     e.preventDefault();
