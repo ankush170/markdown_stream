@@ -14,7 +14,10 @@ const MarkdownStream = ({ markdown, resetTrigger }) => {
     const lines = markdown.split('\n');
     const interval = setInterval(() => {
       if (currentIndex < lines.length) {
-        setContent((prevContent) => prevContent + lines[currentIndex] + '\n');
+        const nextLine = lines[currentIndex];
+        if (nextLine !== undefined) {
+          setContent((prevContent) => prevContent + nextLine + '\n');
+        }
         currentIndex++;
       } else {
         const linkIndex = lines.findIndex(line => line.includes('—||Sources||—'));
